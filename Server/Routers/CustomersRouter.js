@@ -5,6 +5,8 @@ const router=express.Router();
 const multer=require("multer");
 const { ConnectionStates } = require("mongoose");
 const e = require("express");
+const fs=require("fs");
+const { findOne } = require("../Models/CustomerSchema");
 
 
 
@@ -50,39 +52,74 @@ router.get("/customer/:id" , async(req,res)=>{
  }
 })
 
-router.delete("/delcustomer/:id",  async (req,res)=>{
-  try{
+router.delete("/delcustomer/:id",   (req,res)=>{
+  
   const  id=req.params.id;
-  
-         const yes= await Customer.remove({_id:id});
+          
+          
+     Customer.findOne({_id:id})
+     .then(data=>{
+       
+      fs.unlink(`./upload/${data.profilePicture}`,(err)=>{
+        if(err)throw err;
+        Customer.remove({_id:id})
+          .then(re=>{
+      
+            if(re.deletedCount){
+              res.json({msg:"deleted successfully"});
+            
+            }
+          })
+          .catch(err=>{
+            console.log(err);
+          })
+          
+       
         
-         if(yes.deletedCount)
-          res.json({msg:"deleted successfully"});
-          else
-          res.json({err:"no data found to delete"});
-  
-  }
-  catch(err)
-  {
-    console.log(err);
-  }
+      });   
+
+     })
+      .catch(err=>{
+      res.json({err:"no data found to delete"});
+     })
+        
+          
+         
+        
+          
+         
+
 });
 
 router.put("/ubdateCustomer/:id",upload.single("file1"), async (req,res)=>{
-  console.log(req.file); 
-  console.log(req.body);
+  
  try{ 
   const {firstName,lastName,occupation,dob,status,bio}=req.body;
    const id=req.params.id;
    var createdDateTime = new Date(dob + 'Z'); 
 
- 
-   await Customer.updateOne({_id:id},{$set:{firstName:firstName,lastName:lastName,dob:createdDateTime,status:status,bio:bio,profilePicture:req.file.filename}});
+  if(req.file)
+  { 
+    const data= await Customer.findOne({_id:id});
+    if(data){
+      
+     fs.unlink(`./upload/${data.profilePicture}`,async(err)=>{
+      if(err)throw err;
+      await Customer.updateOne({_id:id},{$set:{firstName:firstName,lastName:lastName,dob:createdDateTime,status:status,bio:bio,profilePicture:req.file.filename}});
+     }) 
+    
+    }
+  }
+  else 
+
+   await Customer.updateOne({_id:id},{$set:{firstName:firstName,lastName:lastName,dob:createdDateTime,status:status,bio:bio}});
+   
+  
   
   res.json({msg:"update success"});
  }catch(err)
  {
-   res.json({err:"error not found "})
+   res.json({err:"error  found "})
    console.log(err);
  }
 }) 

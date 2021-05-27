@@ -41,7 +41,7 @@ const loc=useLocation();
        }
        catch(err)
        {
-         console.log(err);
+         console.log(err.response);
        }
     }
   else
@@ -57,11 +57,11 @@ const loc=useLocation();
  catch(err)
  {
    
-   if (err.response) {
-    
-    console(err.response);
+   
+    alert("Error  while saving the data please check your Server ...or connections ");
+    console.log(err);
   
- }
+ 
  }
       
     } 
@@ -143,7 +143,7 @@ const   handleImageChange=(e)=>{
      <form onSubmit={handleSubmit(submit)} >
       <div className="row mt-5 mx-5  " >  
         <div className="col-md-10 main ">
-        {console.log(stateImage)}      
+            
         <div className="card" >
             <div className="card-header">{ loc.editId?"You can update details "  :"Please  fill the following  information (Customer Entry Form)"}</div>
             <div className="card-body">
@@ -172,7 +172,7 @@ const   handleImageChange=(e)=>{
 
  <div className="form-group mb-3"  >
     <label htmlFor="date">DOB </label>
-    {console.log(state.dob)}
+    
     <Controller
         control={control}
         name="dob"
